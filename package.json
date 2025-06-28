@@ -1,0 +1,6 @@
+{
+  "message": "첼로 월드 가장 좋아",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  }
+}
