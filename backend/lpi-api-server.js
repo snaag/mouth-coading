@@ -4,8 +4,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 const app = express();
 app.use(bodyParser.json());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
 // JWT 비밀 키
 const JWT_SECRET = process.env.JWT_SECRET || 'lpi_secret_key';
@@ -13,18 +15,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'lpi_secret_key';
 // 사용자 데이터
 let users = [
   {
-    username: 'mentor1',
+    email: 'mentor1@naver.com',
     password: 'pass1',
     name: '홍길동',
     contact: 'mentor1@email.com',
-    type: 'mentor'
+    role: 'mentor'
   },
   {
-    username: 'mentee1',
+    email: 'mentee1@naver.com',
     password: 'pass2',
     name: '김철수',
     contact: '010-1234-5678',
-    type: 'mentee'
+    role: 'mentee'
   }
 ];
 
@@ -93,6 +95,17 @@ app.get('/api/mentor-request', (req, res) => {
   res.json(mentorRequests);
 });
 
+// 멘토 신청 승인 (PUT)
+app.put('/api/mentor-request/accept', authenticateToken, (req, res) => {
+  const { mentee, mentor } = req.body;
+  const request = mentorRequests.find(r => r.mentee === mentee && r.mentor === mentor);
+  if (!request) {
+    return res.status(404).json({ message: 'Mentor request not found.' });
+  }
+  request.status = 'accepted';
+  res.json({ message: 'Mentor request accepted.' });
+});
+
 // 상담 글 작성 (POST)
 app.post('/api/counseling', authenticateToken, (req, res) => {
   const { writer, mentor, date, reply } = req.body;
@@ -157,6 +170,24 @@ app.get('/api/me', authenticateToken, (req, res) => {
   // 비밀번호 제외
   const { password, ...userInfo } = user;
   res.json(userInfo);
+});
+
+// 멘토 전체 리스트 조회 (GET /api/mentors)
+app.get('/api/mentors', authenticateToken, (req, res) => {
+  // skill, order_by 쿼리 파라미터 지원
+  let mentors = users.filter(u => u.role === 'mentor');
+  const { skill, order_by } = req.query;
+  if (skill) {
+    mentors = mentors.filter(m => (m.profile?.skills || []).map(s => s.toLowerCase()).includes(skill.toLowerCase()));
+  }
+  if (order_by === 'name') {
+    mentors.sort((a, b) => (a.profile?.name || '').localeCompare(b.profile?.name || ''));
+  } else if (order_by === 'skill') {
+    mentors.sort((a, b) => ((a.profile?.skills || []).join(',')).localeCompare((b.profile?.skills || []).join(',')));
+  } else {
+    mentors.sort((a, b) => (a.id || 0) - (b.id || 0));
+  }
+  res.json(mentors);
 });
 
 // 기존 users 배열에 email 기반 사용자만 남기고, username/contact/type 기반 예시 제거

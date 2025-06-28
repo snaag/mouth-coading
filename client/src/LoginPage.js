@@ -23,7 +23,9 @@ export default function LoginPage() {
       }
       const data = await res.json();
       localStorage.setItem('token', data.token);
-      navigate('/mentors');
+      setTimeout(() => {
+        window.location.href = '/match-requests';
+      }, 100);
     } catch (err) {
       setError('서버 오류');
     }
@@ -33,7 +35,7 @@ export default function LoginPage() {
     <div className="login-page">
       <h2>로그인</h2>
       <form onSubmit={handleLogin}>
-        <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input type="text" placeholder="이메일 또는 아이디" value={email} onChange={e => setEmail(e.target.value)} required />
         <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} required />
         <button type="submit">로그인</button>
       </form>
