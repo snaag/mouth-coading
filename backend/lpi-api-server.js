@@ -6,8 +6,13 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const app = express();
+
+// CORS 설정: 클라이언트 주소 명시
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(bodyParser.json());
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
 // JWT 비밀 키
 const JWT_SECRET = process.env.JWT_SECRET || 'lpi_secret_key';
@@ -15,6 +20,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'lpi_secret_key';
 // 사용자 데이터
 let users = [
   {
+    id: 1,
     email: 'mentor1@naver.com',
     password: 'pass1',
     name: '홍길동',
@@ -22,6 +28,7 @@ let users = [
     role: 'mentor'
   },
   {
+    id: 2,
     email: 'mentee1@naver.com',
     password: 'pass2',
     name: '김철수',
