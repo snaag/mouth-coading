@@ -15,6 +15,7 @@ const users = [
 let matches = [];
 
 // 상담 요청 상태를 저장할 배열
+// 각 요청은 { mentor: string, mentee: string, message: string, date: string } 형태입니다.
 let requests = [];
 
 const server = http.createServer((req, res) => {
@@ -139,6 +140,15 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ message: '잘못된 요청', error: err.message }));
       }
     });
+    return;
+  }
+
+  // 멘토 목록을 반환하는 API
+  if (req.method === 'GET' && parsedUrl.pathname === '/api/mentors') {
+    // 멘토 role을 가진 사용자만 반환
+    const mentors = users.filter(u => u.role === 'mentor').map(u => ({ username: u.username, contact: u.contact }));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(mentors));
     return;
   }
 
