@@ -65,7 +65,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// 멘토 신청 (POST)
+// 멘토 신청 생성 (POST /api/mentor-request)
 app.post('/api/mentor-request', authenticateToken, (req, res) => {
   const { mentee, mentor } = req.body;
   if (!mentee || !mentor) {
@@ -79,7 +79,7 @@ app.post('/api/mentor-request', authenticateToken, (req, res) => {
   res.json({ message: 'Mentor request submitted.', status: 'pending' });
 });
 
-// 멘토 신청 삭제 (DELETE)
+// 멘토 신청 삭제 (DELETE /api/mentor-request)
 app.delete('/api/mentor-request', authenticateToken, (req, res) => {
   const { mentee, mentor } = req.body;
   const prevLength = mentorRequests.length;
@@ -90,20 +90,23 @@ app.delete('/api/mentor-request', authenticateToken, (req, res) => {
   res.json({ message: 'Mentor request deleted.' });
 });
 
-// 멘토 신청 전체 조회 (GET)
-app.get('/api/mentor-request', (req, res) => {
-  res.json(mentorRequests);
-});
-
-// 멘토 신청 승인 (PUT)
-app.put('/api/mentor-request/accept', authenticateToken, (req, res) => {
-  const { mentee, mentor } = req.body;
+// 멘토 신청 상태 변경 (PUT /api/mentor-request/status)
+app.put('/api/mentor-request/status', authenticateToken, (req, res) => {
+  const { mentee, mentor, status } = req.body;
+  if (!mentee || !mentor || !status) {
+    return res.status(400).json({ message: 'mentee, mentor, status are required.' });
+  }
   const request = mentorRequests.find(r => r.mentee === mentee && r.mentor === mentor);
   if (!request) {
     return res.status(404).json({ message: 'Mentor request not found.' });
   }
-  request.status = 'accepted';
-  res.json({ message: 'Mentor request accepted.' });
+  request.status = status;
+  res.json({ message: 'Mentor request status updated.', status });
+});
+
+// 멘토 신청 전체 조회 (GET /api/mentor-request)
+app.get('/api/mentor-request', (req, res) => {
+  res.json(mentorRequests);
 });
 
 // 상담 글 작성 (POST)
