@@ -18,7 +18,7 @@ let users = [
     email: 'mentor1@naver.com',
     password: 'pass1',
     name: '홍길동',
-    contact: 'mentor1@email.com',
+    contact: 'mentor1@naver.com',
     role: 'mentor'
   },
   {
